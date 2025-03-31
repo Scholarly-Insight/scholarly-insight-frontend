@@ -1,36 +1,84 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Scholarly Insight
+
+Scholarly Insight is a web application that allows users to search, browse, and stay updated with scholarly articles across various scientific disciplines provided by the arXiv API.
+
+## Features
+
+- **Search and Browse**: Search and browse articles using author, category, and publication date filters
+- **Article Details**: Display detailed article information, including abstracts and links to full papers
+- **User Accounts**: Create accounts to save favorite articles, set up alerts for new publications, and track reading history
+- **AI Insights**: Get AI-generated summaries and key points for research papers
+- **Discussion**: Discuss articles and share insights with other researchers
+
+## Technology Stack
+
+- **Frontend**: React, TypeScript, Tailwind CSS
+- **Routing**: React Router
+- **Authentication**: Firebase Authentication
+- **Database**: Firebase Firestore
+- **API Integration**: arXiv API
 
 ## Getting Started
 
-First, run the development server:
+### Prerequisites
 
+- Node.js (v18 or higher)
+- Bun (v1.0 or higher)
+
+### Installation
+
+1. Clone the repository
 ```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+git clone https://github.com/yourusername/scholarly-insight.git
+cd scholarly-insight
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+2. Install dependencies
+```bash
+bun install
+```
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+3. Set up Firebase
+   - Create a Firebase project
+   - Enable Authentication (Email/Password and Google)
+   - Create a Firestore database
+   - Add your Firebase configuration to `src/services/firebase.ts`
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+4. Start the development server
+```bash
+bun run dev
+```
 
-## Learn More
+## Build and Deploy
 
-To learn more about Next.js, take a look at the following resources:
+To build the project for production:
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+```bash
+bun run build
+```
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+The build output will be in the `dist` directory.
 
-## Deploy on Vercel
+## Project Structure
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+- `/src/components`: UI components
+- `/src/pages`: Page components
+- `/src/services`: API and Firebase services
+- `/src/types`: TypeScript type definitions
+- `/src/router`: Routing configuration
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+## Contributing
+
+Contributions are welcome! Please feel free to submit a Pull Request.
+
+## License
+
+This project is licensed under the MIT License - see the LICENSE file for details.
+
+## Acknowledgments
+
+- [arXiv API](https://info.arxiv.org/help/api/index.html) for providing access to scientific papers
+- [Firebase](https://firebase.google.com/) for authentication and database services
+- [Tailwind CSS](https://tailwindcss.com/) for styling
+- [React Router](https://reactrouter.com/) for routing
+- [TypeScript](https://www.typescriptlang.org/) for type safety

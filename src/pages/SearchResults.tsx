@@ -150,6 +150,7 @@ const SearchResults: React.FC = () => {
     return paginationArray;
   };
 
+
   async function QuerySearch() {
     console.log("QuerySearch", query);
     const response = await searchArticles({searchQuery: query, sortBy: 'relevance', sortOrder: 'descending', startIndex: 0, maxResults: 20});

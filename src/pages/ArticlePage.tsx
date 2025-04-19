@@ -10,7 +10,6 @@ import {getDiscussionData, sendCommentData} from '../services/discussionService'
 import { getAuth } from 'firebase/auth';
 
 import DiscussionMessage from '../components/ui/DiscussionMessage';
-import CommentForm from "../components/ui/CommentForm";
 
 const ArticlePage: React.FC = () => {
   const { articleId } = useParams<{ articleId: string }>();

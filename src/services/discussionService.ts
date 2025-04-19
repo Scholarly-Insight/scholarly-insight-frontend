@@ -1,6 +1,7 @@
 import {initializeApp} from 'firebase/app';
 import {
-    getFirestore, collection, getDocs
+  getFirestore, collection, getDocs, addDoc,
+  doc, setDoc
 } from 'firebase/firestore'
 
 import { DiscussionEntry, CommentReply } from '../types/discussion';
@@ -9,78 +10,46 @@ const firebaseConfig = {
     apiKey: "AIzaSyD319eb4sz5ylo8oAjnx-d5iGpQxI5qUJ0",
     authDomain: "scholarly-insight-2908.firebaseapp.com",
     projectId: "scholarly-insight-2908",
-    storageBucket: "",
+    storageBucket: "scholarly-insight-2908.appspot.com",
     messagingSenderId: "43532q46523465",
-    appId: "",
+    appId: "1:43532q46523465:web:abc123def456"
 }
 
 initializeApp(firebaseConfig);
 
 const db = getFirestore();
 
-const colRef = collection(db, "commentBase");
-
-getDocs(colRef)
-    .then((snapshot) => {
-        console.log(snapshot.docs)
-    })
-
-
-
-export const getDiscussionData = async (articleId: string): Promise<DiscussionEntry[]> => {
+export const getDiscussionData = async (articleId: string) => {
     try {
-      // get the data
-
-      // heres some placeholder data for now
-      return [{
-        id: articleId,
-        articleId: "12342",
-        message: "Long Message Commenting on an article that is very long and has a lot of content. This is a test to see if the message can be long enough to fit in the comment box and still be readable. Let's see how this goes.",
-        username: "John Doe",
-        timestamp: Date.now(),
-        replies: [
-          {
-            id: "reply1",
-            articleId: articleId,
-            message: "This is a reply to the comment.",
-            username: "Jane Doe",
-            timestamp: Date.now(),
-          },
-          {
-            id: "reply2",
-            articleId: articleId,
-            message: "This is another reply to the comment.",
-            username: "Alice Smith",
-            timestamp: Date.now(),
-          },
-        ],
-      
-      }];
-
-
+      const commentsCol = collection(db, 'articles', articleId, 'comments');
+      const commentsSnapshot = await getDocs(commentsCol);
+      const comments = await Promise.all(commentsSnapshot.docs.map(async doc => {
+          const data = doc.data();
+          const repliesCol = collection(db, 'articles', articleId, 'comments', doc.id, 'replies');
+          const repliesSnapshot = await getDocs(repliesCol);
+          const replies = repliesSnapshot.docs.map(replyDoc => replyDoc.data());
+          return { ...data, id: doc.id, replies };
+      }));
+      return comments;
     } catch (error) {
-      console.error('Error fetching article discussion', error);
-      throw new Error('Error fetching article discussion');
+        console.error("Firestore fetch failed:", error);
+        return [];
     }
 };
 
 
+export const sendCommentData = async (articleId: string, comment: any) => {
+  const articleRef = doc(db, 'articles', articleId);
+  await setDoc(articleRef, { exists: true }, { merge: true });
 
-export const sendReplyData = async (articleId: string, reply: CommentReply) => {
-  try {
-    // send over a reply to a message
-  } catch (error) {
-    console.error('Error fetching article discussion', error);
-    throw new Error('Error fetching article discussion');
-  }
+  const commentsCol = collection(db, 'articles', articleId, 'comments');
+  await addDoc(commentsCol, comment);
 };
 
 
-export const sendCommentData = async (articleId: string, comment: DiscussionEntry) => {
-  try {
-    // send over a new comment
-  } catch (error) {
-    console.error('Error fetching article discussion', error);
-    throw new Error('Error fetching article discussion');
-  }
+
+export const sendReplyData = async (articleId: string, commentId: string, reply: any) => {
+  const repliesCol = collection(db, 'articles', articleId, 'comments', commentId, 'replies');
+  await addDoc(repliesCol, reply);
 };
+

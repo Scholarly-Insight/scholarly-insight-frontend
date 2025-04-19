@@ -124,7 +124,7 @@ const ArticlePage: React.FC = () => {
               <div className="mb-4">
                 <h3 className="text-sm font-medium text-scholarly-secondaryText mb-1">Authors</h3>
                 <p className="text-scholarly-text">
-                  {article.authors.map((author, index) => (
+                   {article.authors.map((author, index) => (
                     <span key={author.name + index}>
                       <Link
                         to={`/search?author=${encodeURIComponent(author.name)}`}
@@ -134,7 +134,7 @@ const ArticlePage: React.FC = () => {
                       </Link>
                       {index < article.authors.length - 1 ? ', ' : ''}
                     </span>
-                  ))}
+                  ))} 
                 </p>
               </div>
 

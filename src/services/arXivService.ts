@@ -37,18 +37,54 @@ const parseXmlResponse = async (xmlString: string): Promise<ArXivApiResponse> =>
       paper_link: '',
       pdf_link: '',
       authors: [],
+      categories: [],
+      primary_category: null
     };
 
     let startIndex = 6;
 
+    //Parse authors
     while (entry[startIndex].includes("<author>")) {
-      startIndex += 1;
-      entryObject.authors.push(entry[startIndex].replace(/<\/?name>/g, ''));
-      startIndex += 2;
+      startIndex += 1; // Move to the name line
+      const name = entry[startIndex].replace(/<\/?name>/g, '');
+      
+      // Check if the next element is an affiliation
+      let affiliation = undefined;
+      if (entry[startIndex + 1] && entry[startIndex + 1].includes("<arxiv:affiliation")) {
+        affiliation = entry[startIndex + 1].replace(/<\/?arxiv:affiliation[^>]*>/g, '');
+        startIndex += 3; // Skip affiliation and author closing tag
+      } else {
+        startIndex += 2; // skip the author closing tag
+      }
+      
+
+      entryObject.authors.push({ 
+        name: name, 
+        affiliation: affiliation 
+      });
     }
 
+
+    
+    //Parse arxiv link and pdf link
     for (let j = startIndex; j < entry.length; j++) {
       const line = entry[j];
+      
+      // Parse categories
+      if (line.includes("<category")) {
+        const term = line.match(/term="([^"]+)"/)?.[1] || '';
+        const scheme = line.match(/scheme="([^"]+)"/)?.[1] || '';
+        const label = line.match(/label="([^"]+)"/)?.[1] || '';
+        
+        const category = { term, scheme, label };
+        entryObject.categories.push(category);
+        
+        // If primary_category is not set yet, set it to the first category
+        if (!entryObject.primary_category) {
+          entryObject.primary_category = category;
+        }
+      }
+
       if (line.includes("<link")) {
         if (line.includes('rel="alternate"')) {
           entryObject.paperLink = line.match(/href="([^"]+)"/)?.[1] || '';
@@ -120,16 +156,17 @@ const parseXmlResponse = async (xmlString: string): Promise<ArXivApiResponse> =>
         summary: entry.summary,
         published: entry.published,
         updated: entry.updated,
-        authors,
-        categories,
+        authors: entry.authors,
+        categories: entry.categories,
+        //do we need links here?
         links,
         doi: entry['arxiv:doi'],
         journal_ref: entry['arxiv:journal_ref'],
         comment: entry['arxiv:comment'],
-        primary_category: {
-          term: entry['arxiv:primary_category']?.term || categories[0]?.term || '',
-          scheme: entry['arxiv:primary_category']?.scheme,
-          label: entry['arxiv:primary_category']?.label,
+        primary_category: entry.primary_category || entry.categories[0] || {
+          term: '',
+          scheme: '',
+          label: ''
         },
         paper_link: entry.paperLink,
         pdf_link: entry.pdfLink,

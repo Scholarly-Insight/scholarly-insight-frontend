@@ -48,7 +48,6 @@ const SearchResults: React.FC = () => {
           startIndex: (page - 1) * resultsPerPage,
           maxResults: resultsPerPage,
         };
-        console.log("PARAMS", params);
         const response = await searchArticles(params);
         setArticles(response.feed.entry);
         setTotalResults(response.feed.totalResults || response.feed.entry.length);

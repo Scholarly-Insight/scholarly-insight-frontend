@@ -1,0 +1,90 @@
+# Bun specific
+.bun
+
+# Note: bun.lockb should NOT be ignored to ensure reproducible builds
+# According to official practices, this file should be versioned
+# See: https://stackoverflow.com/questions/77093220/should-bun-lockb-file-be-versioned
+
+# Dependencies
+node_modules/
+jspm_packages/
+web_modules/
+bower_components/
+
+# Package manager files (except Bun lockfile)
+package-lock.json
+yarn.lock
+.pnpm-debug.log*
+
+# Build outputs
+dist/
+build/
+out/
+.output/
+build/Release
+
+# Environment variables
+.env
+.env.local
+.env.development.local
+.env.test.local
+.env.production.local
+
+# Editor directories and files
+.idea/
+.vscode/
+*.suo
+*.ntvs*
+*.njsproj
+*.sln
+*.sw?
+.DS_Store
+
+# Debug logs
+logs
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+lerna-debug.log*
+bun-debug.log*
+
+# Testing
+coverage/
+*.lcov
+.nyc_output/
+report.[0-9]*.[0-9]*.[0-9]*.[0-9]*.json
+
+# Runtime data
+pids
+*.pid
+*.seed
+*.pid.lock
+
+# TypeScript
+*.tsbuildinfo
+
+# OS specific
+.DS_Store
+Thumbs.db
+
+# Cache directories
+.cache/
+.parcel-cache/
+.rollup.cache/
+.webpack/
+.eslintcache
+.stylelintcache
+.npm
+
+# Temporary files
+*.tmp
+*.temp
+*.swp
+.lock-wscript
+
+# Generated specific to Bun
+**/*.trace
+**/*.zip
+**/*.tar.gz
+**/*.tgz

@@ -1,4 +1,5 @@
 "use client";
+import { collection, getDocs } from "firebase/firestore";
 import { Key, useState } from "react";
 import { CommentReply, DiscussionEntry } from "../../types/discussion";
 import { format } from "date-fns";
@@ -16,20 +17,26 @@ export default function DiscussionMessage(props: {
   );
 
   async function handle() {
-    const reply = {
-      id: "reply1",
-      articleId: props.comment.articleId,
-      message: value,
-      username: "John Doe",
-      timestamp: Date.now(),
+      if (!value.trim()) return;
+
+      try {
+        const reply = {
+            articleId: props.comment.articleId,
+            message: value,
+            username: "Test User", // TODO: currentUser?.displayName || "Anonymous User",
+            userId: "123", // TODO: currentUser?.uid,
+            timestamp: Date.now(),
+        };
+
+        await sendReplyData(props.comment.articleId, props.comment.id, reply);
+        setReplies(prev => [...prev, reply]);
+        setValue("");
+      } catch (error) {
+        console.error("Error adding reply:", error);
+      }
     }
-    
-    sendReplyData(props.comment.articleId, reply)
 
-    setReplies((oldArray) => [...oldArray, reply]);
 
-    setValue("");
-  }
 
   return (
     <div className="w-full flex-col mb-0 justify-self-center p-4 text-gray-800 dark:text-white">

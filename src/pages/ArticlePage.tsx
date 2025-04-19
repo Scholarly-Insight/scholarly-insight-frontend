@@ -76,7 +76,7 @@ const ArticlePage: React.FC = () => {
   }
 
   const publishDate = new Date(article.published);
-  const pdfLink = article.links.find(link => link.title === 'pdf' || link.type === 'application/pdf')?.href;
+  //const pdfLink = article.links.find(link => link.title === 'pdf' || link.type === 'application/pdf')?.href;
 
   async function addComment() {
     const message = {
@@ -159,9 +159,9 @@ const ArticlePage: React.FC = () => {
                   <span>Share</span>
                 </button>
 
-                {pdfLink && (
+                {article.pdf_link && (
                   <a
-                    href={pdfLink}
+                    href={article.pdf_link}
                     target="_blank"
                     rel="noopener noreferrer"
                     className="flex items-center space-x-1 text-scholarly-secondaryText hover:text-scholarly-primary"

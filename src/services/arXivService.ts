@@ -34,6 +34,8 @@ const parseXmlResponse = async (xmlString: string): Promise<ArXivApiResponse> =>
       published: entry[3].replace(/<\/?published>/g, ''),
       title: entry[4].replace(/<\/?title>/g, ''),
       summary: entry[5].replace(/<\/?summary>/g, ''),
+      paper_link: '',
+      pdf_link: '',
       authors: [],
     };
 
@@ -43,6 +45,17 @@ const parseXmlResponse = async (xmlString: string): Promise<ArXivApiResponse> =>
       startIndex += 1;
       entryObject.authors.push(entry[startIndex].replace(/<\/?name>/g, ''));
       startIndex += 2;
+    }
+
+    for (let j = startIndex; j < entry.length; j++) {
+      const line = entry[j];
+      if (line.includes("<link")) {
+        if (line.includes('rel="alternate"')) {
+          entryObject.paperLink = line.match(/href="([^"]+)"/)?.[1] || '';
+        } else if (line.includes('title="pdf"')) {
+          entryObject.pdfLink = line.match(/href="([^"]+)"/)?.[1] || '';
+        }
+      }
     }
 
     result.push(entryObject);
@@ -117,7 +130,9 @@ const parseXmlResponse = async (xmlString: string): Promise<ArXivApiResponse> =>
           term: entry['arxiv:primary_category']?.term || categories[0]?.term || '',
           scheme: entry['arxiv:primary_category']?.scheme,
           label: entry['arxiv:primary_category']?.label,
-        }
+        },
+        paper_link: entry.paperLink,
+        pdf_link: entry.pdfLink,
       };
     });
 
@@ -178,7 +193,6 @@ export const searchArticles = async (params: SearchParams): Promise<ArXivApiResp
         'Accept': 'application/xml',
       },
     });
-
     return parseXmlResponse(response.data);
   } catch (error) {
     console.error('Error searching arXiv articles:', error);

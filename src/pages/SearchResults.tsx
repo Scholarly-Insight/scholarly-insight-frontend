@@ -48,7 +48,7 @@ const SearchResults: React.FC = () => {
           startIndex: (page - 1) * resultsPerPage,
           maxResults: resultsPerPage,
         };
-
+        console.log("PARAMS", params);
         const response = await searchArticles(params);
         setArticles(response.feed.entry);
         setTotalResults(response.feed.totalResults || response.feed.entry.length);
@@ -94,13 +94,48 @@ const SearchResults: React.FC = () => {
         <p className="text-scholarly-text line-clamp-2">
           {article.summary.substring(0, 200)}...
         </p>
-        <div className="mt-2">
+        <div className="mt-2 flex space-x-4">
           <Link
             to={`/article/${article.id.split('/').pop()}`}
             className="text-scholarly-primary text-sm hover:underline"
           >
             Read more
           </Link>
+          {article.paper_link && (
+            <a 
+              href={article.paper_link} 
+              target="_blank" 
+              rel="noopener noreferrer" 
+              className="text-scholarly-primary text-sm hover:underline"
+            >
+              arXiv Page
+            </a>
+          )}
+
+            {article.pdf_link && (
+            <a 
+              href={article.pdf_link} 
+              target="_blank" 
+              rel="noopener noreferrer" 
+              className="text-scholarly-primary text-sm hover:underline flex items-center"
+            >
+              <span>PDF</span>
+              <svg 
+                xmlns="http://www.w3.org/2000/svg" 
+                className="h-4 w-4 ml-1" 
+                fill="none" 
+                viewBox="0 0 24 24" 
+                stroke="currentColor"
+              >
+                <path 
+                  strokeLinecap="round" 
+                  strokeLinejoin="round" 
+                  strokeWidth={2} 
+                  d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" 
+                />
+              </svg>
+            </a>
+          )}
         </div>
       </div>
     );

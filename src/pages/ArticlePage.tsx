@@ -211,24 +211,6 @@ const ArticlePage: React.FC = () => {
             </div>
           </div>
 
-          {/* Links */}
-          <div className="bg-white rounded-lg shadow-scholarly-card p-6 mb-6">
-            <h2 className="text-xl font-semibold mb-3">Links</h2>
-            <div className="space-y-2">
-              {article.links.map((link, index) => (
-                <a
-                  key={index}
-                  href={link.href}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="block text-scholarly-primary hover:underline"
-                >
-                  {link.title || link.rel || 'Link'} {link.type && `(${link.type})`}
-                </a>
-              ))}
-            </div>
-          </div>
-
           {/* Discussion */}
             <div className="bg-white rounded-lg shadow-scholarly-card p-6 mb-6">
               <h2 className="text-xl font-semibold mb-3">Discussion</h2>

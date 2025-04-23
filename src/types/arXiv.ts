@@ -29,6 +29,8 @@ export interface ArXivArticle {
   journal_ref?: string;
   comment?: string;
   primary_category: ArXivCategory;
+  paper_link: string;
+  pdf_link: string;
 }
 
 export interface ArXivApiResponse {

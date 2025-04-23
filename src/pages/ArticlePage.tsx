@@ -84,7 +84,7 @@ const ArticlePage: React.FC = () => {
 //   const currentUser = auth.currentUser; // TODO: Uncomment when integrating user authentication
 
   const publishDate = new Date(article.published);
-  const pdfLink = article.links.find(link => link.title === 'pdf' || link.type === 'application/pdf')?.href;
+  //const pdfLink = article.links.find(link => link.title === 'pdf' || link.type === 'application/pdf')?.href;
 
   async function addComment() {
     // TODO: Uncomment when integrating user authentication
@@ -140,7 +140,7 @@ const ArticlePage: React.FC = () => {
               <div className="mb-4">
                 <h3 className="text-sm font-medium text-scholarly-secondaryText mb-1">Authors</h3>
                 <p className="text-scholarly-text">
-                  {article.authors.map((author, index) => (
+                   {article.authors.map((author, index) => (
                     <span key={author.name + index}>
                       <Link
                         to={`/search?author=${encodeURIComponent(author.name)}`}
@@ -150,7 +150,7 @@ const ArticlePage: React.FC = () => {
                       </Link>
                       {index < article.authors.length - 1 ? ', ' : ''}
                     </span>
-                  ))}
+                  ))} 
                 </p>
               </div>
 
@@ -175,9 +175,9 @@ const ArticlePage: React.FC = () => {
                   <span>Share</span>
                 </button>
 
-                {pdfLink && (
+                {article.pdf_link && (
                   <a
-                    href={pdfLink}
+                    href={article.pdf_link}
                     target="_blank"
                     rel="noopener noreferrer"
                     className="flex items-center space-x-1 text-scholarly-secondaryText hover:text-scholarly-primary"
@@ -207,24 +207,6 @@ const ArticlePage: React.FC = () => {
                 >
                   {category.term}
                 </Link>
-              ))}
-            </div>
-          </div>
-
-          {/* Links */}
-          <div className="bg-white rounded-lg shadow-scholarly-card p-6 mb-6">
-            <h2 className="text-xl font-semibold mb-3">Links</h2>
-            <div className="space-y-2">
-              {article.links.map((link, index) => (
-                <a
-                  key={index}
-                  href={link.href}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="block text-scholarly-primary hover:underline"
-                >
-                  {link.title || link.rel || 'Link'} {link.type && `(${link.type})`}
-                </a>
               ))}
             </div>
           </div>

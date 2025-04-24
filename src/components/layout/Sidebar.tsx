@@ -3,7 +3,7 @@ import { Link } from 'react-router-dom';
 import ScholarlyLogo from '../ui/ScholarlyLogo';
 import {
   FaHome, FaSearch, FaBookmark, FaHistory,
-  FaBell, FaCog, FaBook, FaUserCircle, FaChevronDown, FaChevronRight
+  FaBell, FaCog, FaBook, FaUserCircle, FaChevronDown, FaChevronRight, FaRocketchat
 } from 'react-icons/fa';
 
 interface SidebarProps {
@@ -60,6 +60,15 @@ const Sidebar: React.FC<SidebarProps> = ({
             >
               <FaSearch size={collapsed ? 20 : 16} />
               {!collapsed && <span>Search</span>}
+            </Link>
+          </li>
+          <li>
+            <Link
+              to="/discussion"
+              className="flex items-center gap-3 p-2 rounded-lg text-scholarly-text hover:bg-scholarly-hoverBg"
+            >
+              <FaRocketchat size={collapsed ? 20 : 16} />
+              {!collapsed && <span>Discussion</span>}
             </Link>
           </li>
           <li>

@@ -4,6 +4,8 @@ import {
   doc, setDoc
 } from 'firebase/firestore'
 
+import { ArXivArticle, SearchParams } from '../types/arXiv';
+import { searchArticles } from '../services/arXivService';
 import { DiscussionEntry, CommentReply } from '../types/discussion';
 
 const firebaseConfig = {
@@ -52,4 +54,3 @@ export const sendReplyData = async (articleId: string, commentId: string, reply:
   const repliesCol = collection(db, 'articles', articleId, 'comments', commentId, 'replies');
   await addDoc(repliesCol, reply);
 };
-

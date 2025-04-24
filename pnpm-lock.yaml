@@ -35,6 +35,9 @@ importers:
       react-router-dom:
         specifier: ^7.4.0
         version: 7.4.1(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
+      react-simple-timestamp-to-date:
+        specifier: ^1.0.3
+        version: 1.0.3
       tailwindcss-animate:
         specifier: ^1.0.7
         version: 1.0.7(tailwindcss@3.4.17)
@@ -2186,6 +2189,9 @@ packages:
     peerDependenciesMeta:
       react-dom:
         optional: true
+
+  react-simple-timestamp-to-date@1.0.3:
+    resolution: {integrity: sha512-Vx9Anf0UWR7jm+FrRbxvq/11vEYWsIjsBWdBjaIYJDiewBQLWwC0LI6+4E6t05/k4iigut4bPcZ5+Hzj9LrwAQ==}
 
   react@18.3.1:
     resolution: {integrity: sha512-wS+hAgJShR0KhEvPJArfuPVN1+Hz1t0Y6n5jLrGQbkb4urgPE/0Rve+1kMB1v/oWgHgm4WIcV+i7F2pTVj+2iQ==}
@@ -4850,6 +4856,8 @@ snapshots:
       turbo-stream: 2.4.0
     optionalDependencies:
       react-dom: 18.3.1(react@18.3.1)
+
+  react-simple-timestamp-to-date@1.0.3: {}
 
   react@18.3.1:
     dependencies:

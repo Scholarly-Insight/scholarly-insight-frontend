@@ -38,6 +38,10 @@ const ArticlePage: React.FC = () => {
         setCommentsLoading(true);
 
         const discussionData = await getDiscussionData(articleId || "No Article Provided");
+
+
+        console.log("Discussion Data:", discussionData);
+        
         setDiscussion(discussionData);
 
         // After fetching article, get AI insights
@@ -212,6 +216,7 @@ const ArticlePage: React.FC = () => {
           </div>
 
           {/* Discussion */}
+          <section id="discussion">
             <div className="bg-white rounded-lg shadow-scholarly-card p-6 mb-6">
               <h2 className="text-xl font-semibold mb-3">Discussion</h2>
 
@@ -266,7 +271,7 @@ const ArticlePage: React.FC = () => {
                 </div>
               </div>
             </div>
-
+          </section>
         </div>
 
         {/* Sidebar with AI insights */}

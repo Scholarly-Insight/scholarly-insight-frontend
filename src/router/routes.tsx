@@ -7,6 +7,7 @@ const Home = React.lazy(() => import('../pages/Home'));
 const ArticlePage = React.lazy(() => import('../pages/ArticlePage'));
 const SearchResults = React.lazy(() => import('../pages/SearchResults'));
 const Discussion = React.lazy(() => import('../pages/Discussion'));
+const DiscussionPost = React.lazy(() => import('../pages/DiscussionPost'));
 const AuthPage = React.lazy(() => import('../pages/AuthPage'));
 const ProfilePage = React.lazy(() => import('../pages/ProfilePage'));
 const FavoritesPage = React.lazy(() => import('../pages/FavoritesPage'));
@@ -47,6 +48,10 @@ export const router = createBrowserRouter([
       {
         path: 'discussion',
         element: <Discussion />
+      },
+      {
+        path: 'discussionpost',
+        element: <DiscussionPost />
       },
       {
         path: 'auth',

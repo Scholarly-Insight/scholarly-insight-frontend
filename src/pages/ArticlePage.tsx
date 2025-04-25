@@ -109,6 +109,14 @@ const ArticlePage: React.FC = () => {
 
         const updatedDiscussion = await getDiscussionData(articleId || "No Article Provided");
         setDiscussion(updatedDiscussion);
+
+          
+        setDiscussion(discussion => {
+          const dataToSort = [...discussion];
+          dataToSort.sort((a, b) => Number(b.timestamp) - Number(a.timestamp)); // or b.money - a.money to invert order
+          return dataToSort; // <-- now sorted ascending
+        })
+        
         setValue("");
       } catch (error) {
         console.error("Error adding comment:", error);

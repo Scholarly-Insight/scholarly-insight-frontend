@@ -46,9 +46,12 @@ const Discussion: React.FC = () => {
         setDiscussion((discussion) => [...discussion, discussionData[i]]);
 
 
-        const articleData1 = {title: "General Comment"};
+        if (discussionData[i].articleId == "General Comment") {
+          const articleData1 = {title: "General Comment"};
 
-        setArticleData((articleData) => [...articleData, articleData1]);
+          setArticleData((articleData) => [...articleData, articleData1]);
+        }
+
           
         setDiscussion(discussion => {
           const dataToSort = [...discussion];
@@ -130,6 +133,8 @@ const Discussion: React.FC = () => {
         dataToSort.sort((a, b) => Number(b.timestamp) - Number(a.timestamp)); // or b.money - a.money to invert order
         return dataToSort; // <-- now sorted ascending
       })
+
+      
       
       setValue("");
     } catch (error) {
@@ -163,7 +168,7 @@ const Discussion: React.FC = () => {
       discussion.map((entry, i) => (
         <div key={"discussion"+entry.id} className="article-card mb-4">
         <h3 className="text-lg font-medium text-scholarly-text mb-2">
-          <Link to={`/article/${entry?.articleId || ""}#discussion`} className="hover:text-scholarly-primary">
+          <Link to={String(entry.articleId)==="General Comment" ? `/discussionPost` : `/article/${entry.articleId}#discussion`    }   className="hover:text-scholarly-primary">
           {"Comments on "} <span className="text-scholarly-secondaryText text-gray text-lg mb-2"> {articleData[i]?.title} </span>{" on " + format(new Date(entry.timestamp), 'MMMM dd, yyyy')}
           </Link>
         </h3>
@@ -179,7 +184,7 @@ const Discussion: React.FC = () => {
 
         <div className="mt-2 flex space-x-4">
           <Link
-            to={`/article/${entry.articleId}#discussion`}
+            to={String(entry.articleId)==="General Comment" ? `/discussionPost` : `/article/${entry.articleId}#discussion`    }
             className="text-scholarly-primary text-sm hover:underline"
           >
             View Comment

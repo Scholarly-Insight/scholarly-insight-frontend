@@ -135,7 +135,7 @@ const DiscussionPost: React.FC = () => {
       {/* Discussion */}
       <section id="discussion">
         <div className="bg-white rounded-lg shadow-scholarly-card p-6 mb-6">
-          <h2 className="text-xl font-semibold mb-3">Discussion</h2>
+          <h2 className="text-xl font-semibold mb-3">General Discussion Posts</h2>
 
           {commentsLoading ? (
             <div className="text-center py-4">

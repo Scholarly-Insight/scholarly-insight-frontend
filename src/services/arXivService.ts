@@ -274,7 +274,8 @@ export const getRecentArticles = async (categories: string[] = [], maxResults = 
         search_query: query || 'all',
         start: 0,
         max_results: maxResults,
-        sortBy: '-lastUpdatedDate',
+        sortBy: 'lastUpdatedDate',
+        sortOrder: 'descending',
       },
       headers: {
         'Accept': 'application/xml',

@@ -14,6 +14,7 @@ const FavoritesPage = React.lazy(() => import('../pages/FavoritesPage'));
 const ReadingHistoryPage = React.lazy(() => import('../pages/ReadingHistoryPage'));
 const AlertsPage = React.lazy(() => import('../pages/AlertsPage'));
 const NotFoundPage = React.lazy(() => import('../pages/NotFoundPage'));
+const SettingsPage = React.lazy(() => import('../pages/SettingsPage'));
 
 // Auth-protected route wrapper
 const ProtectedRoute = ({ children }: { children: React.ReactNode }) => {
@@ -72,6 +73,10 @@ export const router = createBrowserRouter([
       {
         path: 'alerts',
         element: <ProtectedRoute><AlertsPage /></ProtectedRoute>
+      },
+      {
+        path: 'settings',
+        element: <ProtectedRoute><SettingsPage /></ProtectedRoute>
       },
       {
         path: '*',

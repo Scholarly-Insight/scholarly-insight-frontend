@@ -1,15 +1,19 @@
-import React, { useState, useEffect } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import { getArticleById } from '../services/arXivService';
 import { generateInsights } from '../services/aiService';
 import { ArXivArticle, AIInsight } from '../types/arXiv';
 import { DiscussionEntry } from '../types/discussion';
 import { format } from 'date-fns';
-import { FaRegBookmark, FaBookmark, FaShare, FaDownload } from 'react-icons/fa';
+import { FaRegBookmark, FaBookmark, FaShare, FaDownload, FaFilePdf, FaTimes, FaExpand, FaCompress, FaThumbsDown, FaRegThumbsDown, FaThumbsUp, FaRegThumbsUp } from 'react-icons/fa';
 import {getDiscussionData, sendCommentData} from '../services/discussionService';
 import { getAuth } from 'firebase/auth';
 
 import DiscussionMessage from '../components/ui/DiscussionMessage';
+import React, { useState, useEffect, useRef } from 'react';
+import { generateAISummary, enhanceWithPDFInfo } from '../services/ai_summary/aiSummaryService';
+import { saveUserInteraction, hasUserInteraction } from '../services/userPreferencesService';
+import { addToReadingHistory, likeArticle, dislikeArticle, isArticleLiked, isArticleDisliked } from '../utils/articleInteractions';
+
 
 const ArticlePage: React.FC = () => {
   const { articleId } = useParams<{ articleId: string }>();
@@ -24,6 +28,15 @@ const ArticlePage: React.FC = () => {
   const [discussion, setDiscussion] = useState<DiscussionEntry[]>([]);
   const [comments, setComments] = useState([]);
   const [commentsLoading, setCommentsLoading] = useState<boolean>(false);
+  const [pdfUrl, setPdfUrl] = useState<string | null>(null);
+  
+  // New state for PDF viewer
+  const [showPdfViewer, setShowPdfViewer] = useState<boolean>(false);
+  const [fullscreenPdf, setFullscreenPdf] = useState<boolean>(false);
+  const pdfViewerRef = useRef<HTMLDivElement>(null);
+
+  const [isDisliked, setIsDisliked] = useState<boolean>(false);
+  const [isLiked, setIsLiked] = useState<boolean>(false);
 
   useEffect(() => {
     const fetchArticle = async () => {
@@ -35,19 +48,35 @@ const ArticlePage: React.FC = () => {
         setArticle(articleData);
         setError(null);
 
-        setCommentsLoading(true);
+        // Find and set PDF URL with enhanced detection
+        const foundPdfUrl = findPdfUrl(articleData);
+        setPdfUrl(foundPdfUrl);
+        console.log('PDF URL set to:', foundPdfUrl);
+
+        // Add to reading history
+        if (articleData) {
+          addToReadingHistory({
+            id: articleId,
+            title: articleData.title,
+            authors: articleData.authors.map(author => author.name),
+            abstract: articleData.summary,
+            date: articleData.published || new Date().toISOString(),
+            source: 'arxiv'
+          });
+        }
 
         const discussionData = await getDiscussionData(articleId || "No Article Provided");
-
-
-        console.log("Discussion Data:", discussionData);
-        
         setDiscussion(discussionData);
 
-        // After fetching article, get AI insights
+        // Use the new AI summary service
         setInsightsLoading(true);
-        const articleInsights = await generateInsights(articleData);
-        setInsights(articleInsights);
+        // Get the AI insights using our new service
+        const articleInsights = await generateAISummary(articleData);
+        
+        // Enhance insights with PDF information
+        const enhancedInsights = enhanceWithPDFInfo(articleInsights, foundPdfUrl || undefined);
+        
+        setInsights(enhancedInsights);
       } catch (err) {
         setError('Failed to load article. Please try again later.');
         console.error('Error fetching article:', err);
@@ -60,6 +89,175 @@ const ArticlePage: React.FC = () => {
 
     fetchArticle();
   }, [articleId]);
+
+  // Use useEffect to load saved preferences
+  useEffect(() => {
+    if (articleId) {
+      // Check if article was previously liked or disliked using new utilities
+      setIsDisliked(isArticleDisliked(articleId));
+      setIsLiked(isArticleLiked(articleId));
+      
+      // Check if article was previously saved
+      const wasSaved = hasUserInteraction(articleId, 'save');
+      setIsFavorite(wasSaved);
+      
+      // Record view interaction
+      saveUserInteraction({
+        articleId,
+        timestamp: Date.now(),
+        interactionType: 'view',
+      });
+    }
+  }, [articleId]);
+
+  // Helper function to find PDF URL with better detection
+  const findPdfUrl = (article: ArXivArticle): string | null => {
+    if (!article || !article.links || article.links.length === 0) return null;
+    
+    // First, try to find a direct PDF link
+    let pdfLink = article.links.find(link => 
+      link.title?.toLowerCase() === 'pdf' || 
+      link.type === 'application/pdf' || 
+      (link.href && link.href.toLowerCase().includes('.pdf'))
+    );
+    
+    // If not found, try to find an arXiv link that can be converted to PDF
+    if (!pdfLink) {
+      const arxivLink = article.links.find(link => 
+        link.href && (
+          link.href.includes('arxiv.org/abs/') || 
+          link.href.includes('arxiv.org/pdf/')
+        )
+      );
+      
+      if (arxivLink) {
+        // Convert abstract URL to PDF URL if needed
+        let href = arxivLink.href;
+        if (href.includes('/abs/')) {
+          href = href.replace('/abs/', '/pdf/') + '.pdf';
+        } else if (!href.endsWith('.pdf')) {
+          href = href + '.pdf';
+        }
+        
+        return href;
+      }
+    }
+    
+    return pdfLink ? pdfLink.href : null;
+  };
+
+  // Handler for PDF click
+  const handleViewPdf = () => {
+    setShowPdfViewer(true);
+  };
+
+  // Handler for closing PDF viewer
+  const handleClosePdf = () => {
+    setShowPdfViewer(false);
+    setFullscreenPdf(false);
+  };
+
+  // Toggle fullscreen mode for PDF
+  const toggleFullscreen = () => {
+    setFullscreenPdf(!fullscreenPdf);
+  };
+
+  // Update like handler to use the new utility
+  const handleLike = () => {
+    // Toggle liked state
+    const newLikedState = !isLiked;
+    
+    // If liked, remove dislike
+    if (newLikedState && isDisliked) {
+      setIsDisliked(false);
+    }
+    
+    setIsLiked(newLikedState);
+    
+    if (articleId && article) {
+      if (newLikedState) {
+        // Use the new utility to add to liked articles
+        likeArticle({
+          id: articleId,
+          title: article.title,
+          authors: article.authors.map(author => author.name),
+          abstract: article.summary,
+          date: article.published || new Date().toISOString(),
+          source: 'arxiv'
+        });
+      }
+      
+      // Still record in user preferences service for analytics
+      saveUserInteraction({
+        articleId,
+        timestamp: Date.now(),
+        interactionType: 'like',
+        metadata: {
+          category: article?.primary_category?.term,
+          authors: article?.authors.map(author => author.name),
+          title: article?.title
+        }
+      });
+    }
+  };
+
+  // Update dislike handler to use the new utility
+  const handleDislike = () => {
+    const newDislikedState = !isDisliked;
+    
+    // If disliked, remove like
+    if (newDislikedState && isLiked) {
+      setIsLiked(false);
+    }
+    
+    setIsDisliked(newDislikedState);
+    
+    if (articleId && article) {
+      if (newDislikedState) {
+        // Use the new utility to add to disliked articles
+        dislikeArticle({
+          id: articleId,
+          title: article.title,
+          authors: article.authors.map(author => author.name),
+          abstract: article.summary,
+          date: article.published || new Date().toISOString(),
+          source: 'arxiv'
+        });
+      }
+      
+      // Still record in user preferences service for analytics
+      saveUserInteraction({
+        articleId,
+        timestamp: Date.now(),
+        interactionType: 'dislike',
+        metadata: {
+          category: article?.primary_category?.term,
+          authors: article?.authors.map(author => author.name),
+          title: article?.title
+        }
+      });
+    }
+  };
+
+  // Update favorite handler
+  const handleFavoriteToggle = () => {
+    const newFavoriteState = !isFavorite;
+    setIsFavorite(newFavoriteState);
+    
+    if (articleId) {
+      // Save the interaction
+      saveUserInteraction({
+        articleId,
+        timestamp: Date.now(),
+        interactionType: 'save',
+        metadata: {
+          category: article?.primary_category?.term,
+          authors: article?.authors.map(author => author.name),
+          title: article?.title
+        }
+      });
+    }
+  };
 
   if (loading) {
     return (
@@ -285,28 +483,52 @@ const ArticlePage: React.FC = () => {
         {/* Sidebar with AI insights */}
         <div className="lg:col-span-1">
           <div className="bg-white rounded-lg shadow-scholarly-card p-6 sticky top-6">
-            <h2 className="text-xl font-semibold mb-4 scholarly-logo-text">AI Insights</h2>
+            <h2 className="text-xl font-semibold mb-4 scholarly-logo-text">AI Summary</h2>
 
             {insightsLoading ? (
               <div className="text-center py-8">
                 <div className="inline-block animate-spin rounded-full h-8 w-8 border-4 border-scholarly-primary border-t-transparent"></div>
-                <p className="mt-2 text-scholarly-secondaryText">Generating insights...</p>
+                <p className="mt-2 text-scholarly-secondaryText">Generating summary...</p>
               </div>
             ) : insights ? (
               <>
                 <div className="mb-6">
                   <h3 className="text-md font-medium text-scholarly-secondaryText mb-2">Summary</h3>
-                  <p className="text-scholarly-text">{insights.summary}</p>
+                  <p className="text-scholarly-text whitespace-pre-line leading-relaxed">{insights.summary}</p>
                 </div>
 
                 <div className="mb-6">
                   <h3 className="text-md font-medium text-scholarly-secondaryText mb-2">Key Findings</h3>
                   <ul className="list-disc pl-5 text-scholarly-text space-y-2">
                     {insights.keyFindings.map((finding, index) => (
-                      <li key={index}>{finding}</li>
+                      <li key={index} className="leading-relaxed">{finding}</li>
                     ))}
                   </ul>
                 </div>
+                
+                {pdfUrl && (
+                  <div className="mb-6 bg-gray-50 p-4 rounded-lg border border-gray-100">
+                    <h3 className="text-md font-medium text-scholarly-secondaryText mb-2">Full Paper Access</h3>
+                    <div className="space-y-2">
+                      <a 
+                        href={pdfUrl} 
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="flex items-center text-scholarly-primary hover:underline"
+                      >
+                        <FaDownload className="mr-2" />
+                        <span>Download PDF</span>
+                      </a>
+                      <button
+                        onClick={handleViewPdf}
+                        className="flex items-center text-scholarly-primary hover:underline w-full"
+                      >
+                        <FaFilePdf className="text-red-500 mr-2" />
+                        <span>View PDF</span>
+                      </button>
+                    </div>
+                  </div>
+                )}
 
                 {insights.relatedArticles && insights.relatedArticles.length > 0 && (
                   <div>
@@ -338,6 +560,48 @@ const ArticlePage: React.FC = () => {
           </div>
         </div>
       </div>
+
+      {/* PDF Viewer Overlay */}
+      {showPdfViewer && pdfUrl && (
+        <div 
+          className={`fixed inset-0 bg-black bg-opacity-75 flex items-center justify-center z-50 ${
+            fullscreenPdf ? 'p-0' : 'p-8'
+          }`}
+          onClick={handleClosePdf}
+        >
+          <div 
+            ref={pdfViewerRef}
+            className={`bg-white rounded-lg overflow-hidden relative ${
+              fullscreenPdf ? 'w-full h-full rounded-none' : 'w-11/12 h-5/6 max-w-6xl'
+            }`}
+            onClick={e => e.stopPropagation()}
+          >
+            <div className="flex justify-between items-center p-3 bg-gray-100 border-b border-gray-200">
+              <h3 className="font-medium text-lg truncate">{article.title}</h3>
+              <div className="flex space-x-2">
+                <button 
+                  onClick={toggleFullscreen}
+                  className="p-2 text-gray-600 hover:text-gray-800 hover:bg-gray-200 rounded-full"
+                >
+                  {fullscreenPdf ? <FaCompress /> : <FaExpand />}
+                </button>
+                <button 
+                  onClick={handleClosePdf}
+                  className="p-2 text-gray-600 hover:text-gray-800 hover:bg-gray-200 rounded-full"
+                >
+                  <FaTimes />
+                </button>
+              </div>
+            </div>
+            <iframe
+              src={pdfUrl}
+              className="w-full h-full"
+              style={{ height: fullscreenPdf ? 'calc(100% - 54px)' : 'calc(100% - 54px)' }}
+              title="PDF Viewer"
+            />
+          </div>
+        </div>
+      )}
     </div>
   );
 };

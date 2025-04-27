@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { getRecentArticles, searchArticles } from '../services/arXivService';
 import { ArXivArticle } from '../types/arXiv';
 import { format } from 'date-fns';
@@ -8,6 +8,8 @@ const Home: React.FC = () => {
   const [recentArticles, setRecentArticles] = useState<ArXivArticle[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
+  const [searchQuery, setSearchQuery] = useState<string>('');
+  const navigate = useNavigate();
 
   useEffect(() => {
     const fetchRecentArticles = async () => {
@@ -26,6 +28,14 @@ const Home: React.FC = () => {
 
     fetchRecentArticles();
   }, []);
+
+  // Handle search form submission
+  const handleSearch = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (searchQuery.trim()) {
+      navigate(`/search?q=${encodeURIComponent(searchQuery.trim())}`);
+    }
+  };
 
   const renderArticleCard = (article: ArXivArticle) => {
     const publishDate = new Date(article.published);
@@ -81,16 +91,23 @@ const Home: React.FC = () => {
           <p className="text-xl text-scholarly-secondaryText mb-6">
             Discover the latest research with AI-powered insights across all scientific domains
           </p>
-          <div className="relative">
-            <input
-              type="text"
-              placeholder="Search for articles, authors, or keywords..."
-              className="w-full py-3 px-4 pr-10 border border-scholarly-borderColor rounded-lg focus:outline-none focus:ring-2 focus:ring-scholarly-primary"
-            />
-            <button className="absolute right-3 top-1/2 -translate-y-1/2 bg-scholarly-primary text-white rounded-lg px-4 py-2">
-              Search
-            </button>
-          </div>
+          <form onSubmit={handleSearch}>
+            <div className="relative">
+              <input
+                type="text"
+                placeholder="Search for articles, authors, or keywords..."
+                className="w-full py-3 px-4 pr-10 border border-scholarly-borderColor rounded-lg focus:outline-none focus:ring-2 focus:ring-scholarly-primary"
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+              />
+              <button 
+                type="submit"
+                className="absolute right-3 top-1/2 -translate-y-1/2 bg-scholarly-primary text-white rounded-lg px-4 py-2"
+              >
+                Search
+              </button>
+            </div>
+          </form>
         </div>
       </section>
 

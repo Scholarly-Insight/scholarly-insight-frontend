@@ -42,7 +42,14 @@ const AuthPage: React.FC = () => {
 
     try {
       setLoading(true);
-      await loginUser(email, password);
+      const userData = await loginUser(email, password);
+      
+      // Store token and user info in localStorage
+      localStorage.setItem('token', userData.token || 'dummy-token-for-demo');
+      localStorage.setItem('userEmail', email);
+      localStorage.setItem('userName', userData.displayName || email.split('@')[0]);
+      
+      // Navigate to home page
       navigate('/');
     } catch (err) {
       const errorMessage = err instanceof Error ? err.message : 'Failed to sign in';
@@ -67,7 +74,25 @@ const AuthPage: React.FC = () => {
 
     try {
       setLoading(true);
-      await registerUser(email, password, displayName);
+      const userData = await registerUser(email, password, displayName);
+      
+      // Store token and user info in localStorage
+      localStorage.setItem('token', userData.token || 'dummy-token-for-demo');
+      localStorage.setItem('userEmail', email);
+      localStorage.setItem('userName', displayName);
+      
+      // Initialize user settings with defaults
+      const defaultSettings = {
+        darkMode: false,
+        emailNotifications: true,
+        openPDFInNewTab: true,
+        fullscreenPDFViewer: false,
+        defaultSearchEngine: 'both',
+        arXivCategories: ['cs.AI', 'cs.CL']
+      };
+      localStorage.setItem('userSettings', JSON.stringify(defaultSettings));
+      
+      // Navigate to home page
       navigate('/');
     } catch (err) {
       const errorMessage = err instanceof Error ? err.message : 'Failed to create account';
@@ -80,7 +105,14 @@ const AuthPage: React.FC = () => {
   const handleGoogleSignIn = async () => {
     try {
       setLoading(true);
-      await signInWithGoogle();
+      const userData = await signInWithGoogle();
+      
+      // Store token and user info in localStorage
+      localStorage.setItem('token', userData.token || 'dummy-token-for-demo');
+      localStorage.setItem('userEmail', userData.email || '');
+      localStorage.setItem('userName', userData.displayName || 'User');
+      
+      // Navigate to home page
       navigate('/');
     } catch (err) {
       const errorMessage = err instanceof Error ? err.message : 'Failed to sign in with Google';

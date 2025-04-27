@@ -5,7 +5,7 @@ import { ArXivArticle, SearchParams } from '../types/arXiv';
 import { format } from 'date-fns';
 
 const SearchResults: React.FC = () => {
-  const [searchParams] = useSearchParams();
+  const [searchParams, setSearchParams] = useSearchParams();
   const [articles, setArticles] = useState<ArXivArticle[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
@@ -13,9 +13,15 @@ const SearchResults: React.FC = () => {
   const [page, setPage] = useState<number>(1);
   const [query, setQuery] = useState("");
 
+  // Get search parameters
   const searchQuery = searchParams.get('q') || '';
   const category = searchParams.get('category') || '';
   const author = searchParams.get('author') || '';
+
+  // Initialize the query state with the URL search query
+  useEffect(() => {
+    setQuery(searchQuery);
+  }, [searchQuery]);
 
   const resultsPerPage = 20;
 
@@ -41,6 +47,8 @@ const SearchResults: React.FC = () => {
           queryString = 'all';
         }
 
+        console.log('Executing search with query:', queryString);
+
         const params: SearchParams = {
           searchQuery: queryString,
           sortBy: 'relevance',
@@ -62,6 +70,22 @@ const SearchResults: React.FC = () => {
 
     fetchSearchResults();
   }, [searchQuery, category, author, page]);
+
+  // Handle search form submission
+  const handleSearch = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!query.trim()) return;
+    
+    // Create new search params preserving category and author if present
+    const newParams = new URLSearchParams();
+    if (query) newParams.set('q', query);
+    if (category) newParams.set('category', category);
+    if (author) newParams.set('author', author);
+    
+    // Update URL params and reset to page 1
+    setSearchParams(newParams);
+    setPage(1);
+  };
 
   const handlePageChange = (newPage: number) => {
     setPage(newPage);
@@ -93,7 +117,7 @@ const SearchResults: React.FC = () => {
         <p className="text-scholarly-text line-clamp-2">
           {article.summary.substring(0, 200)}...
         </p>
-        <div className="mt-2 flex space-x-4">
+        <div className="mt-2">
           <Link
             to={`/article/${article.id.split('/').pop()}`}
             className="text-scholarly-primary text-sm hover:underline"
@@ -212,22 +236,23 @@ const SearchResults: React.FC = () => {
           </div>
         </div>
 
-        <div className="relative">
-          <input
-            type="text"
-            defaultValue={searchQuery}
-            placeholder="Refine your search..."
-            className="w-full py-2 px-3 pr-10 border border-scholarly-borderColor rounded-lg focus:outline-none focus:ring-2 focus:ring-scholarly-primary"
-            value={query}
-            onChange={(e) => {
-              setQuery(e.target.value);
-            }}
-          />
-          <button className="absolute right-2 top-1/2 -translate-y-1/2 bg-scholarly-primary text-white rounded-lg px-3 py-1"
-            onClick={QuerySearch}>
-            Search
-          </button>
-        </div>
+        <form onSubmit={handleSearch}>
+          <div className="relative">
+            <input
+              type="text"
+              placeholder="Refine your search..."
+              className="w-full py-2 px-3 pr-10 border border-scholarly-borderColor rounded-lg focus:outline-none focus:ring-2 focus:ring-scholarly-primary"
+              value={query}
+              onChange={(e) => setQuery(e.target.value)}
+            />
+            <button 
+              type="submit" 
+              className="absolute right-2 top-1/2 -translate-y-1/2 bg-scholarly-primary text-white rounded-lg px-3 py-1"
+            >
+              Search
+            </button>
+          </div>
+        </form>
       </div>
 
       {/* Applied filters */}

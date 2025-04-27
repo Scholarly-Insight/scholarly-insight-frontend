@@ -1,4 +1,4 @@
-import { initializeApp } from 'firebase/app';
+import { initializeApp, getApps, getApp } from 'firebase/app';
 import {
   getAuth,
   createUserWithEmailAndPassword,
@@ -56,6 +56,9 @@ const auth = getAuth(app);
 const db = getFirestore(app);
 const googleProvider = new GoogleAuthProvider();
 
+// Export Firebase instances so they can be reused
+export { app, db, auth, googleProvider };
+
 // User Authentication
 export const registerUser = async (email: string, password: string, displayName: string) => {
   try {
@@ -70,7 +73,15 @@ export const registerUser = async (email: string, password: string, displayName:
       updatedAt: serverTimestamp(),
     });
 
-    return userCredential.user;
+    // Get the token
+    const token = await userCredential.user.getIdToken();
+
+    return {
+      uid: userCredential.user.uid,
+      email: userCredential.user.email,
+      displayName,
+      token
+    };
   } catch (error) {
     console.error('Error registering user:', error);
     throw error;
@@ -80,7 +91,16 @@ export const registerUser = async (email: string, password: string, displayName:
 export const loginUser = async (email: string, password: string) => {
   try {
     const userCredential = await signInWithEmailAndPassword(auth, email, password);
-    return userCredential.user;
+    
+    // Get the token
+    const token = await userCredential.user.getIdToken();
+    
+    return {
+      uid: userCredential.user.uid,
+      email: userCredential.user.email,
+      displayName: userCredential.user.displayName,
+      token
+    };
   } catch (error) {
     console.error('Error logging in:', error);
     throw error;
@@ -104,7 +124,15 @@ export const signInWithGoogle = async () => {
       });
     }
 
-    return result.user;
+    // Get the token
+    const token = await result.user.getIdToken();
+    
+    return {
+      uid: result.user.uid,
+      email: result.user.email,
+      displayName: result.user.displayName,
+      token
+    };
   } catch (error) {
     console.error('Error signing in with Google:', error);
     throw error;
@@ -114,6 +142,14 @@ export const signInWithGoogle = async () => {
 export const signOut = async () => {
   try {
     await firebaseSignOut(auth);
+    
+    // Clear user data from localStorage
+    localStorage.removeItem('token');
+    localStorage.removeItem('userEmail');
+    localStorage.removeItem('userName');
+    
+    // Don't remove settings to persist them between sessions
+    // localStorage.removeItem('userSettings');
   } catch (error) {
     console.error('Error signing out:', error);
     throw error;

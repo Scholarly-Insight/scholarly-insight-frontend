@@ -57,6 +57,7 @@ export interface AIInsight {
   summary: string;
   keyFindings: string[];
   relatedArticles?: ArXivArticle[];
+  pdfLink?: string;
 }
 
 export interface UserFavorite {

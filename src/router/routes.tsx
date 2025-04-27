@@ -1,0 +1,87 @@
+import React from 'react';
+import { createBrowserRouter, Navigate } from 'react-router-dom';
+
+// Import layout and pages
+const Layout = React.lazy(() => import('../components/layout/Layout'));
+const Home = React.lazy(() => import('../pages/Home'));
+const ArticlePage = React.lazy(() => import('../pages/ArticlePage'));
+const SearchResults = React.lazy(() => import('../pages/SearchResults'));
+const Discussion = React.lazy(() => import('../pages/Discussion'));
+const DiscussionPost = React.lazy(() => import('../pages/DiscussionPost'));
+const AuthPage = React.lazy(() => import('../pages/AuthPage'));
+const ProfilePage = React.lazy(() => import('../pages/ProfilePage'));
+const SavedPage = React.lazy(() => import('../pages/SavedPage'));
+const ReadingHistoryPage = React.lazy(() => import('../pages/ReadingHistoryPage'));
+const AlertsPage = React.lazy(() => import('../pages/AlertsPage'));
+const NotFoundPage = React.lazy(() => import('../pages/NotFoundPage'));
+const SettingsPage = React.lazy(() => import('../pages/SettingsPage'));
+
+// Auth-protected route wrapper
+const ProtectedRoute = ({ children }: { children: React.ReactNode }) => {
+  // Check if user is authenticated by looking for token in localStorage
+  const isAuthenticated = localStorage.getItem('token') !== null;
+
+  if (!isAuthenticated) {
+    return <Navigate to="/auth" replace />;
+  }
+
+  return <>{children}</>;
+};
+
+// Define routes
+export const router = createBrowserRouter([
+  {
+    path: '/',
+    element: <Layout />,
+    children: [
+      {
+        index: true,
+        element: <Home />
+      },
+      {
+        path: 'article/:articleId',
+        element: <ArticlePage />
+      },
+      {
+        path: 'search',
+        element: <SearchResults />
+      },
+      {
+        path: 'discussion',
+        element: <Discussion />
+      },
+      {
+        path: 'discussionpost',
+        element: <DiscussionPost />
+      },
+      {
+        path: 'auth',
+        element: <AuthPage />
+      },
+      {
+        path: 'profile',
+        element: <ProtectedRoute><ProfilePage /></ProtectedRoute>
+      },
+      {
+        path: 'saved',
+        element: <ProtectedRoute><SavedPage /></ProtectedRoute>
+      },
+      {
+        path: 'history',
+        element: <ProtectedRoute><ReadingHistoryPage /></ProtectedRoute>
+      },
+      {
+        path: 'alerts',
+        element: <ProtectedRoute><AlertsPage /></ProtectedRoute>
+      },
+      {
+        path: 'settings',
+        element: <ProtectedRoute><SettingsPage /></ProtectedRoute>
+      },
+      {
+        path: '*',
+        element: <NotFoundPage />
+      }
+    ],
+  },
+]);
